@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dengue Outbreak Predictions</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1280px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        h1, h2 {
+            color: #2c3e50;
+        }
+        button {
+            background-color: #3498db;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+            font-size: 14px;
+        }
+        button:hover {
+            background-color: #2980b9;
+        }
+        select {
+            padding: 10px;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+            margin: 5px;
+        }
+        .status {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+            background-color: #f8f9fa;
+            border-left: 4px solid #3498db;
+        }
+        .error {
+            background-color: #fee;
+            border-left: 4px solid #e74c3c;
+            color: #c0392b;
+        }
+        .success {
+            background-color: #efe;
+            border-left: 4px solid #27ae60;
+            color: #27ae60;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Dengue Outbreak Prediction System</h1>
+        
+        <div class="status" id="dataStatus">Loading data...</div>
+        
+        <h2>Configuration</h2>
+        <div>
+            <select id="regionSelect">
+                <option value="All Regions">All Regions</option>
+            </select>
+            <button id="loadDataBtn">Load Data</button>
+        </div>
+
+        <h2>Model Training</h2>
+        <div>
+            <button id="generateFeaturesBtn">Generate Features</button>
+            <button id="trainModelBtn">Train Model</button>
+            <button id="predictBtn">Make Predictions</button>
+        </div>
+
+        <div id="results"></div>
+    </div>
+
+    <script>
+        let currentData = [];
+
+        // Load regions from backend
+        async function loadRegions() {
+            try {
+                const response = await fetch('http://localhost:5001/api/regions');
+                const result = await response.json();
+                
+                if (result.success) {
+                    const regionSelect = document.getElementById('regionSelect');
+                    regionSelect.innerHTML = '';
+                    
+                    result.regions.forEach(region => {
+                        const option = document.createElement('option');
+                        option.value = region;
+                        option.textContent = region;
+                        regionSelect.appendChild(option);
+                    });
+                    
+                    updateStatus('Regions loaded successfully', 'success');
+                }
+            } catch (error) {
+                updateStatus('Error loading regions. Make sure Flask server is running on port 5000.', 'error');
+                console.error('Region loading error:', error);
+            }
+        }
+
+        // Load data from backend
+        async function loadData() {
+            try {
+                updateStatus('Loading data from server...', '');
+                const response = await fetch('http://localhost:5001/api/dengue-data');
+                const result = await response.json();
+                
+                if (result.success) {
+                    currentData = result.data;
+                    updateStatus(`Successfully loaded ${result.total_records} records with columns: ${result.columns.join(', ')}`, 'success');
+                    console.log('CSV data loaded:', result);
+                } else {
+                    updateStatus('Error: ' + result.error, 'error');
+                }
+            } catch (error) {
+                updateStatus('Failed to connect to server. Make sure Flask is running: python app.py', 'error');
+                console.error('Connection error:', error);
+            }
+        }
+
+        // Make predictions
+        async function makePredictions() {
+            const region = document.getElementById('regionSelect').value;
+            
+            try {
+                updateStatus(`Making predictions for ${region}...`, '');
+                const response = await fetch('http://localhost:5001/api/predict', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ region: region })
+                });
+                
+                const result = await response.json();
+                if (result.success) {
+                    const predictionsText = result.predictions.map(p => 
+                        `${p.period}: ${p.predicted_cases} predicted cases`
+                    ).join('\n');
+                    
+                    updateStatus(`Predictions for ${region} generated successfully!`, 'success');
+                    document.getElementById('results').innerHTML = `
+                        <div class="status success">
+                            <h3>Predictions for ${region}</h3>
+                            ${predictionsText.replace(/\n/g, '<br>')}
+                        </div>
+                    `;
+                } else {
+                    updateStatus('Prediction error: ' + result.error, 'error');
+                }
+            } catch (error) {
+                updateStatus('Prediction service not available: ' + error.message, 'error');
+            }
+        }
+
+        // Update status message
+        function updateStatus(message, type) {
+            const statusElement = document.getElementById('dataStatus');
+            statusElement.textContent = message;
+            statusElement.className = 'status';
+            if (type) {
+                statusElement.classList.add(type);
+            }
+        }
+
+        // Initialize when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            loadRegions();
+            loadData();
+            
+            // Add event listeners
+            document.getElementById('loadDataBtn').addEventListener('click', loadData);
+            document.getElementById('predictBtn').addEventListener('click', makePredictions);
+            document.getElementById('generateFeaturesBtn').addEventListener('click', function() {
+                updateStatus('Feature generation not implemented yet', '');
+            });
+            document.getElementById('trainModelBtn').addEventListener('click', function() {
+                updateStatus('Model training not implemented yet', '');
+            });
+        });
+    </script>
+</body>
+</html>

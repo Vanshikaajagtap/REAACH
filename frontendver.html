@@ -1,0 +1,831 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Healthcare Authentication System</title>
+    <style>
+        :root {
+            --primary: #2c7da0;
+            --secondary: #a9d6e5;
+            --accent: #01497c;
+            --light: #f8f9fa;
+            --dark: #012a4a;
+            --success: #28a745;
+            --danger: #dc3545;
+            --warning: #ffc107;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, var(--secondary) 0%, var(--primary) 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        
+        .container {
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+            width: 100%;
+            max-width: 400px;
+            overflow: hidden;
+        }
+        
+        .header {
+            background-color: var(--primary);
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 24px;
+            margin-bottom: 5px;
+        }
+        
+        .header p {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+        
+        .form-container {
+            padding: 20px;
+        }
+        
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 500;
+            color: var(--dark);
+        }
+        
+        .form-control {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+        
+        .form-control:focus {
+            border-color: var(--primary);
+            outline: none;
+        }
+        
+        .btn {
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        
+        .btn-primary {
+            background-color: var(--primary);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background-color: var(--accent);
+        }
+        
+        .btn-secondary {
+            background-color: var(--secondary);
+            color: var(--dark);
+        }
+        
+        .btn-secondary:hover {
+            background-color: #95c8d8;
+        }
+        
+        .btn-success {
+            background-color: var(--success);
+            color: white;
+        }
+        
+        .btn-success:hover {
+            background-color: #218838;
+        }
+        
+        .btn-danger {
+            background-color: var(--danger);
+            color: white;
+        }
+        
+        .btn-danger:hover {
+            background-color: #c82333;
+        }
+        
+        .form-footer {
+            text-align: center;
+            margin-top: 15px;
+        }
+        
+        .form-footer a {
+            color: var(--primary);
+            text-decoration: none;
+            cursor: pointer;
+        }
+        
+        .form-footer a:hover {
+            text-decoration: underline;
+        }
+        
+        .alert {
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 15px;
+            display: none;
+        }
+        
+        .alert-success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .alert-danger {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        
+        .alert-warning {
+            background-color: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeaa7;
+        }
+        
+        .role-badge {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-left: 8px;
+        }
+        
+        .role-community_health_worker {
+            background-color: #e8f5e9;
+            color: #2e7d32;
+        }
+        
+        .role-doctor {
+            background-color: #e3f2fd;
+            color: #1565c0;
+        }
+        
+        .role-supervisor {
+            background-color: #fce4ec;
+            color: #c2185b;
+        }
+        
+        .dashboard {
+            display: none;
+            padding: 20px;
+        }
+        
+        .dashboard-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .user-info h2 {
+            margin-bottom: 5px;
+        }
+        
+        .dashboard-menu {
+            list-style: none;
+        }
+        
+        .dashboard-menu li {
+            margin-bottom: 10px;
+        }
+        
+        .dashboard-menu button {
+            width: 100%;
+            text-align: left;
+            padding: 12px;
+            background-color: #f8f9fa;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        
+        .dashboard-menu button:hover {
+            background-color: #e9ecef;
+        }
+        
+        .otp-timer {
+            text-align: center;
+            font-size: 14px;
+            margin-top: 10px;
+            color: #6c757d;
+        }
+        
+        .back-button {
+            background: none;
+            border: none;
+            color: var(--primary);
+            cursor: pointer;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
+        .back-button:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Login Form -->
+        <div id="login-form">
+            <div class="header">
+                <h1>Healthcare Login</h1>
+                <p>Access your healthcare portal</p>
+            </div>
+            <div class="form-container">
+                <div id="login-alert" class="alert"></div>
+                <div class="form-group">
+                    <label for="login-username">Username</label>
+                    <input type="text" id="login-username" class="form-control" placeholder="Enter your username">
+                </div>
+                <div class="form-group">
+                    <label for="login-password">Password</label>
+                    <input type="password" id="login-password" class="form-control" placeholder="Enter your password">
+                </div>
+                <button id="login-btn" class="btn btn-primary">Login</button>
+                <div class="form-footer">
+                    <a id="show-forgot-password">Forgot Password?</a> | 
+                    <a id="show-register">Register New Account</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Registration Form -->
+        <div id="register-form" style="display: none;">
+            <div class="header">
+                <h1>Create Account</h1>
+                <p>Join our healthcare network</p>
+            </div>
+            <div class="form-container">
+                <button class="back-button" id="back-to-login-from-register">← Back to Login</button>
+                <div id="register-alert" class="alert"></div>
+                <div class="form-group">
+                    <label for="register-role">I am a</label>
+                    <select id="register-role" class="form-control">
+                        <option value="community_health_worker">Community Health Worker</option>
+                        <option value="doctor">Doctor</option>
+                        <option value="supervisor">Supervisor</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="register-username">Username</label>
+                    <input type="text" id="register-username" class="form-control" placeholder="Choose a username">
+                </div>
+                <div class="form-group">
+                    <label for="register-email">Email</label>
+                    <input type="email" id="register-email" class="form-control" placeholder="Enter your email">
+                </div>
+                <div class="form-group">
+                    <label for="register-phone">Phone Number</label>
+                    <input type="tel" id="register-phone" class="form-control" placeholder="Enter your phone number">
+                </div>
+                <div class="form-group">
+                    <label for="register-fullname">Full Name</label>
+                    <input type="text" id="register-fullname" class="form-control" placeholder="Enter your full name">
+                </div>
+                <div class="form-group">
+                    <label for="register-password">Password</label>
+                    <input type="password" id="register-password" class="form-control" placeholder="Create a password">
+                </div>
+                <div class="form-group">
+                    <label for="register-confirm-password">Confirm Password</label>
+                    <input type="password" id="register-confirm-password" class="form-control" placeholder="Confirm your password">
+                </div>
+                <button id="register-btn" class="btn btn-primary">Register</button>
+            </div>
+        </div>
+
+        <!-- Forgot Password Form -->
+        <div id="forgot-password-form" style="display: none;">
+            <div class="header">
+                <h1>Reset Password</h1>
+                <p>We'll send you a verification code</p>
+            </div>
+            <div class="form-container">
+                <button class="back-button" id="back-to-login-from-forgot">← Back to Login</button>
+                <div id="forgot-alert" class="alert"></div>
+                <div class="form-group">
+                    <label for="forgot-email">Email Address</label>
+                    <input type="email" id="forgot-email" class="form-control" placeholder="Enter your email">
+                </div>
+                <button id="send-otp-btn" class="btn btn-primary">Send Verification Code</button>
+            </div>
+        </div>
+
+        <!-- OTP Verification Form -->
+        <div id="otp-verification-form" style="display: none;">
+            <div class="header">
+                <h1>Verify Identity</h1>
+                <p>Enter the code sent to your email</p>
+            </div>
+            <div class="form-container">
+                <button class="back-button" id="back-from-otp">← Back</button>
+                <div id="otp-alert" class="alert"></div>
+                <div class="form-group">
+                    <label for="otp-code">Verification Code</label>
+                    <input type="text" id="otp-code" class="form-control" placeholder="Enter 6-digit code" maxlength="6">
+                </div>
+                <div class="otp-timer" id="otp-timer">Code expires in: 05:00</div>
+                <button id="verify-otp-btn" class="btn btn-primary">Verify Code</button>
+                <div class="form-footer">
+                    <a id="resend-otp">Resend Code</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Dashboard -->
+        <div id="dashboard" class="dashboard" style="display: none;">
+            <div class="dashboard-header">
+                <div class="user-info">
+                    <h2 id="dashboard-welcome">Welcome, User!</h2>
+                    <span id="dashboard-role" class="role-badge">Role</span>
+                </div>
+                <button id="logout-btn" class="btn btn-danger">Logout</button>
+            </div>
+            
+            <div id="community-health-worker-dashboard" style="display: none;">
+                <h3>Community Health Worker Dashboard</h3>
+                <ul class="dashboard-menu">
+                    <li><button>View Patient Records</button></li>
+                    <li><button>Add Health Data</button></li>
+                    <li><button>Schedule Visits</button></li>
+                    <li><button>Generate Reports</button></li>
+                </ul>
+            </div>
+            
+            <div id="doctor-dashboard" style="display: none;">
+                <h3>Doctor Dashboard</h3>
+                <ul class="dashboard-menu">
+                    <li><button>View Patient History</button></li>
+                    <li><button>Prescribe Medication</button></li>
+                    <li><button>Review Test Results</button></li>
+                    <li><button>Consult with Specialists</button></li>
+                </ul>
+            </div>
+            
+            <div id="supervisor-dashboard" style="display: none;">
+                <h3>Supervisor Dashboard</h3>
+                <ul class="dashboard-menu">
+                    <li><button>Manage Health Workers</button></li>
+                    <li><button>View System Analytics</button></li>
+                    <li><button>Generate Performance Reports</button></li>
+                    <li><button>Manage System Settings</button></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // DOM Elements
+        const loginForm = document.getElementById('login-form');
+        const registerForm = document.getElementById('register-form');
+        const forgotPasswordForm = document.getElementById('forgot-password-form');
+        const otpVerificationForm = document.getElementById('otp-verification-form');
+        const dashboard = document.getElementById('dashboard');
+        
+        // Buttons and links
+        const showRegisterLink = document.getElementById('show-register');
+        const showForgotPasswordLink = document.getElementById('show-forgot-password');
+        const backToLoginFromRegister = document.getElementById('back-to-login-from-register');
+        const backToLoginFromForgot = document.getElementById('back-to-login-from-forgot');
+        const backFromOtp = document.getElementById('back-from-otp');
+        const loginBtn = document.getElementById('login-btn');
+        const registerBtn = document.getElementById('register-btn');
+        const sendOtpBtn = document.getElementById('send-otp-btn');
+        const verifyOtpBtn = document.getElementById('verify-otp-btn');
+        const resendOtpLink = document.getElementById('resend-otp');
+        const logoutBtn = document.getElementById('logout-btn');
+        
+        // Form inputs
+        const loginUsername = document.getElementById('login-username');
+        const loginPassword = document.getElementById('login-password');
+        const registerRole = document.getElementById('register-role');
+        const registerUsername = document.getElementById('register-username');
+        const registerEmail = document.getElementById('register-email');
+        const registerPhone = document.getElementById('register-phone');
+        const registerFullname = document.getElementById('register-fullname');
+        const registerPassword = document.getElementById('register-password');
+        const registerConfirmPassword = document.getElementById('register-confirm-password');
+        const forgotEmail = document.getElementById('forgot-email');
+        const otpCode = document.getElementById('otp-code');
+        
+        // Alerts
+        const loginAlert = document.getElementById('login-alert');
+        const registerAlert = document.getElementById('register-alert');
+        const forgotAlert = document.getElementById('forgot-alert');
+        const otpAlert = document.getElementById('otp-alert');
+        
+        // Dashboard elements
+        const dashboardWelcome = document.getElementById('dashboard-welcome');
+        const dashboardRole = document.getElementById('dashboard-role');
+        const communityHealthWorkerDashboard = document.getElementById('community-health-worker-dashboard');
+        const doctorDashboard = document.getElementById('doctor-dashboard');
+        const supervisorDashboard = document.getElementById('supervisor-dashboard');
+        
+        // OTP Timer
+        const otpTimer = document.getElementById('otp-timer');
+        let otpCountdown;
+        
+        // State management
+        let currentEmail = '';
+        let currentUsername = '';
+        let currentUserData = null;
+        
+        // Event Listeners
+        showRegisterLink.addEventListener('click', () => showForm(registerForm));
+        showForgotPasswordLink.addEventListener('click', () => showForm(forgotPasswordForm));
+        backToLoginFromRegister.addEventListener('click', () => showForm(loginForm));
+        backToLoginFromForgot.addEventListener('click', () => showForm(loginForm));
+        backFromOtp.addEventListener('click', handleBackFromOtp);
+        loginBtn.addEventListener('click', handleLogin);
+        registerBtn.addEventListener('click', handleRegister);
+        sendOtpBtn.addEventListener('click', handleSendOtp);
+        verifyOtpBtn.addEventListener('click', handleVerifyOtp);
+        resendOtpLink.addEventListener('click', handleResendOtp);
+        logoutBtn.addEventListener('click', handleLogout);
+        
+        // Form navigation
+        function showForm(form) {
+            loginForm.style.display = 'none';
+            registerForm.style.display = 'none';
+            forgotPasswordForm.style.display = 'none';
+            otpVerificationForm.style.display = 'none';
+            dashboard.style.display = 'none';
+            
+            form.style.display = 'block';
+            clearAlerts();
+        }
+        
+        function clearAlerts() {
+            loginAlert.style.display = 'none';
+            registerAlert.style.display = 'none';
+            forgotAlert.style.display = 'none';
+            otpAlert.style.display = 'none';
+        }
+        
+        function showAlert(alertElement, message, type) {
+            alertElement.textContent = message;
+            alertElement.className = `alert alert-${type}`;
+            alertElement.style.display = 'block';
+        }
+        
+        // API simulation (in a real app, these would be fetch calls to your backend)
+        function simulateApiCall(data, endpoint) {
+            return new Promise((resolve) => {
+                // Simulate network delay
+                setTimeout(() => {
+                    console.log(`API call to ${endpoint}:`, data);
+                    
+                    // Mock responses based on endpoint
+                    let response;
+                    
+                    if (endpoint === '/login') {
+                        if (data.username === 'supervisor_admin' && data.password === 'admin123') {
+                            response = {
+                                success: true,
+                                message: 'Authentication successful',
+                                user_data: {
+                                    email: 'supervisor@health.org',
+                                    role: 'supervisor',
+                                    full_name: 'Default Supervisor',
+                                    phone: '+1234567890',
+                                    is_verified: true
+                                }
+                            };
+                        } else {
+                            response = {
+                                success: false,
+                                message: 'Invalid credentials'
+                            };
+                        }
+                    } else if (endpoint === '/register') {
+                        response = {
+                            success: true,
+                            message: 'Registration successful. Please verify your email.'
+                        };
+                    } else if (endpoint === '/send-otp') {
+                        response = {
+                            success: true,
+                            message: 'OTP sent successfully'
+                        };
+                    } else if (endpoint === '/verify-otp') {
+                        if (data.otp === '123456') { // Mock valid OTP
+                            response = {
+                                success: true,
+                                message: 'Verification successful'
+                            };
+                        } else {
+                            response = {
+                                success: false,
+                                message: 'Invalid OTP'
+                            };
+                        }
+                    }
+                    
+                    resolve(response);
+                }, 1000);
+            });
+        }
+        
+        // Login handler
+        async function handleLogin() {
+            const username = loginUsername.value.trim();
+            const password = loginPassword.value.trim();
+            
+            if (!username || !password) {
+                showAlert(loginAlert, 'Please fill in all fields', 'danger');
+                return;
+            }
+            
+            showAlert(loginAlert, 'Logging in...', 'warning');
+            loginBtn.disabled = true;
+            
+            try {
+                const response = await simulateApiCall({ username, password }, '/login');
+                
+                if (response.success) {
+                    currentUsername = username;
+                    currentUserData = response.user_data;
+                    currentEmail = response.user_data.email;
+                    
+                    // Show OTP verification
+                    showForm(otpVerificationForm);
+                    startOtpTimer();
+                    showAlert(otpAlert, 'Verification code sent to your email', 'success');
+                } else {
+                    showAlert(loginAlert, response.message, 'danger');
+                }
+            } catch (error) {
+                showAlert(loginAlert, 'Login failed. Please try again.', 'danger');
+            } finally {
+                loginBtn.disabled = false;
+            }
+        }
+        
+        // Registration handler
+        async function handleRegister() {
+            const role = registerRole.value;
+            const username = registerUsername.value.trim();
+            const email = registerEmail.value.trim();
+            const phone = registerPhone.value.trim();
+            const fullname = registerFullname.value.trim();
+            const password = registerPassword.value.trim();
+            const confirmPassword = registerConfirmPassword.value.trim();
+            
+            if (!username || !email || !phone || !fullname || !password || !confirmPassword) {
+                showAlert(registerAlert, 'Please fill in all fields', 'danger');
+                return;
+            }
+            
+            if (password !== confirmPassword) {
+                showAlert(registerAlert, 'Passwords do not match', 'danger');
+                return;
+            }
+            
+            showAlert(registerAlert, 'Creating account...', 'warning');
+            registerBtn.disabled = true;
+            
+            try {
+                const userData = {
+                    role,
+                    email,
+                    phone,
+                    full_name: fullname,
+                    password
+                };
+                
+                const response = await simulateApiCall({ username, ...userData }, '/register');
+                
+                if (response.success) {
+                    currentUsername = username;
+                    currentEmail = email;
+                    
+                    // Show OTP verification
+                    showForm(otpVerificationForm);
+                    startOtpTimer();
+                    showAlert(otpAlert, 'Verification code sent to your email', 'success');
+                } else {
+                    showAlert(registerAlert, response.message, 'danger');
+                }
+            } catch (error) {
+                showAlert(registerAlert, 'Registration failed. Please try again.', 'danger');
+            } finally {
+                registerBtn.disabled = false;
+            }
+        }
+        
+        // Send OTP handler
+        async function handleSendOtp() {
+            const email = forgotEmail.value.trim();
+            
+            if (!email) {
+                showAlert(forgotAlert, 'Please enter your email', 'danger');
+                return;
+            }
+            
+            showAlert(forgotAlert, 'Sending verification code...', 'warning');
+            sendOtpBtn.disabled = true;
+            
+            try {
+                const response = await simulateApiCall({ email, method: 'email' }, '/send-otp');
+                
+                if (response.success) {
+                    currentEmail = email;
+                    
+                    // Show OTP verification
+                    showForm(otpVerificationForm);
+                    startOtpTimer();
+                    showAlert(otpAlert, 'Verification code sent to your email', 'success');
+                } else {
+                    showAlert(forgotAlert, response.message, 'danger');
+                }
+            } catch (error) {
+                showAlert(forgotAlert, 'Failed to send code. Please try again.', 'danger');
+            } finally {
+                sendOtpBtn.disabled = false;
+            }
+        }
+        
+        // Verify OTP handler
+        async function handleVerifyOtp() {
+            const code = otpCode.value.trim();
+            
+            if (!code || code.length !== 6) {
+                showAlert(otpAlert, 'Please enter a valid 6-digit code', 'danger');
+                return;
+            }
+            
+            showAlert(otpAlert, 'Verifying code...', 'warning');
+            verifyOtpBtn.disabled = true;
+            
+            try {
+                const response = await simulateApiCall({ identifier: currentEmail, otp: code }, '/verify-otp');
+                
+                if (response.success) {
+                    clearInterval(otpCountdown);
+                    
+                    if (currentUserData) {
+                        // Login OTP verification successful
+                        showDashboard();
+                    } else {
+                        // Registration or password reset OTP verification successful
+                        showAlert(otpAlert, 'Verification successful! You can now login.', 'success');
+                        setTimeout(() => showForm(loginForm), 2000);
+                    }
+                } else {
+                    showAlert(otpAlert, response.message, 'danger');
+                }
+            } catch (error) {
+                showAlert(otpAlert, 'Verification failed. Please try again.', 'danger');
+            } finally {
+                verifyOtpBtn.disabled = false;
+            }
+        }
+        
+        // Resend OTP handler
+        async function handleResendOtp() {
+            showAlert(otpAlert, 'Sending new code...', 'warning');
+            
+            try {
+                const response = await simulateApiCall({ identifier: currentEmail, method: 'email' }, '/send-otp');
+                
+                if (response.success) {
+                    startOtpTimer();
+                    showAlert(otpAlert, 'New verification code sent', 'success');
+                } else {
+                    showAlert(otpAlert, response.message, 'danger');
+                }
+            } catch (error) {
+                showAlert(otpAlert, 'Failed to resend code. Please try again.', 'danger');
+            }
+        }
+        
+        // Handle back navigation from OTP form
+        function handleBackFromOtp() {
+            clearInterval(otpCountdown);
+            
+            if (currentUserData) {
+                // Came from login
+                showForm(loginForm);
+            } else if (forgotEmail.value) {
+                // Came from forgot password
+                showForm(forgotPasswordForm);
+            } else {
+                // Came from registration
+                showForm(registerForm);
+            }
+        }
+        
+        // Show dashboard with role-specific content
+        function showDashboard() {
+            showForm(dashboard);
+            
+            // Update welcome message
+            dashboardWelcome.textContent = `Welcome, ${currentUserData.full_name}`;
+            
+            // Update role badge
+            dashboardRole.textContent = currentUserData.role.replace('_', ' ').toUpperCase();
+            dashboardRole.className = `role-badge role-${currentUserData.role}`;
+            
+            // Show appropriate dashboard based on role
+            communityHealthWorkerDashboard.style.display = 'none';
+            doctorDashboard.style.display = 'none';
+            supervisorDashboard.style.display = 'none';
+            
+            if (currentUserData.role === 'community_health_worker') {
+                communityHealthWorkerDashboard.style.display = 'block';
+            } else if (currentUserData.role === 'doctor') {
+                doctorDashboard.style.display = 'block';
+            } else if (currentUserData.role === 'supervisor') {
+                supervisorDashboard.style.display = 'block';
+            }
+        }
+        
+        // Logout handler
+        function handleLogout() {
+            currentUsername = '';
+            currentEmail = '';
+            currentUserData = null;
+            
+            // Clear form fields
+            loginUsername.value = '';
+            loginPassword.value = '';
+            registerUsername.value = '';
+            registerEmail.value = '';
+            registerPhone.value = '';
+            registerFullname.value = '';
+            registerPassword.value = '';
+            registerConfirmPassword.value = '';
+            forgotEmail.value = '';
+            otpCode.value = '';
+            
+            showForm(loginForm);
+        }
+        
+        // OTP timer
+        function startOtpTimer() {
+            let timeLeft = 300; // 5 minutes in seconds
+            
+            updateOtpTimer(timeLeft);
+            
+            otpCountdown = setInterval(() => {
+                timeLeft--;
+                
+                if (timeLeft <= 0) {
+                    clearInterval(otpCountdown);
+                    showAlert(otpAlert, 'Verification code has expired', 'danger');
+                }
+                
+                updateOtpTimer(timeLeft);
+            }, 1000);
+        }
+        
+        function updateOtpTimer(seconds) {
+            const minutes = Math.floor(seconds / 60);
+            const remainingSeconds = seconds % 60;
+            otpTimer.textContent = `Code expires in: ${minutes.toString().padStart(2, '0')}:${remainingSeconds.toString().padStart(2, '0')}`;
+        }
+        
+        // Initialize the application
+        showForm(loginForm);
+    </script>
+</body>
+</html>
